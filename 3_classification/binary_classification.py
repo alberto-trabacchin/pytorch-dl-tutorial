@@ -3,7 +3,6 @@ from sklearn.datasets import make_circles
 from sklearn.model_selection import train_test_split
 import matplotlib.pyplot as plt
 from pathlib import Path
-
 import requests
 from pathlib import Path 
 
@@ -74,7 +73,7 @@ def plot_dec_bounds(X_train_ts, X_test_ts, y_train_ts, y_test_ts, model):
 
 if __name__ == "__main__":
     device = "cuda" if torch.cuda.is_available() else "cpu"
-    X, y = make_circles(n_samples = int(1e3), noise = 0.1)
+    X, y = make_circles(n_samples = int(4e3), noise = 0.1)
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.2, shuffle = True)
     model = BinaryClassification(input_size = 2, hidden_size = 10)
     model.to(device)
@@ -102,9 +101,9 @@ if __name__ == "__main__":
         model.eval()
         with torch.inference_mode():
             if epoch % 100 == 0:
-                y_pred_test_tensor = model(X_test_ts).squeeze()
-                test_loss = loss_fun(y_pred_test_tensor, y_test_ts)
-                test_accuracy = accuracy(y_pred_test_tensor, y_test_ts)
+                y_pred_test_ts = model(X_test_ts).squeeze()
+                test_loss = loss_fun(y_pred_test_ts, y_test_ts)
+                test_accuracy = accuracy(y_pred_test_ts, y_test_ts)
                 train_accuracy  = accuracy(y_pred_train, y_train_ts)
                 train_losses.append(train_loss.cpu().numpy())
                 test_losses.append(test_loss.cpu().numpy())
@@ -126,9 +125,8 @@ if __name__ == "__main__":
     loaded_model.to(device)
     loaded_model.load_state_dict(torch.load(MODEL_SAVE_PATH))
     loaded_model.eval()
-    with torch.inference_mode():
-        y_loaded_pred_tensor = loaded_model(X_test_ts).squeeze()
-    print(f"Correct loaded-model predictions: {(y_pred_test_tensor == y_loaded_pred_tensor).all()}")
+    print(model.state_dict())
+    print(loaded_model.state_dict())
 
     plot_dataset(X, y)
     plot_accuracies(train_accuracies, test_accuracies, epoch_counter)
