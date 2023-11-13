@@ -160,3 +160,4 @@ cython_debug/
 #.idea/
 
 env_pytorch_dl_tutorial/*
+*/models/*
