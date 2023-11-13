@@ -78,7 +78,7 @@ if __name__ == "__main__":
 
     MODEL_PATH = Path("2_workflow/models")
     MODEL_PATH.mkdir(parents = True, exist_ok = True)
-    MODEL_NAME = "model_1_lr.pth"
+    MODEL_NAME = "lr_model_v2.pth"
     MODEL_SAVE_PATH = MODEL_PATH / MODEL_NAME
     torch.save(model.state_dict(), MODEL_SAVE_PATH)
 
