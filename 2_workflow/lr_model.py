@@ -34,6 +34,7 @@ class LRModel(torch.nn.Module):
 
 
 if __name__ == "__main__":
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     torch.manual_seed(42)
     weight = 0.2
     bias = 0.1
@@ -42,7 +43,12 @@ if __name__ == "__main__":
     train_size = int(0.8 * len(X))
     X_train, y_train = X[:train_size], y[:train_size]
     X_test, y_test = X[train_size:], y[train_size:]
+    X_train = X_train.to(device)
+    y_train = y_train.to(device)
+    X_test = X_test.to(device)
+    y_test = y_test.to(device)
     model = LRModel()
+    model.to(device)
     loss_fn = torch.nn.L1Loss()
     optimizer = torch.optim.SGD(model.parameters(), lr = 0.001)
     epochs = 100
@@ -62,8 +68,8 @@ if __name__ == "__main__":
             if (epoch % 10) == 0:
                 y_pred = model(X_test)
                 test_loss = loss_fn(y_pred, y_test)
-                train_losses.append(train_loss.detach().numpy())
-                test_losses.append(test_loss.detach().numpy())
+                train_losses.append(train_loss.cpu().detach().numpy())
+                test_losses.append(test_loss.cpu().detach().numpy())
                 epoch_count.append(epoch)
                 print(f"Epoch {epoch}")
                 print("------------------")
@@ -81,15 +87,16 @@ if __name__ == "__main__":
     torch.save(model.state_dict(), MODEL_SAVE_PATH)
 
     plot_losses(train_losses, test_losses, epoch_count)
-    plot_predictions(X_train, y_train, X_test, y_test, y_pred)
+    plot_predictions(X_train.cpu(), y_train.cpu(), X_test.cpu(), y_test.cpu(), y_pred.cpu())
     print(model.state_dict())
     plt.show()
 
     loaded_model = LRModel()
+    loaded_model.to(device)
     loaded_model.load_state_dict(torch.load(MODEL_SAVE_PATH))
     loaded_model.eval()
     with torch.inference_mode():
         y_loaded_pred = loaded_model(X_test)
-    plot_predictions(X_train, y_train, X_test, y_test, y_loaded_pred)
+    plot_predictions(X_train.cpu(), y_train.cpu(), X_test.cpu(), y_test.cpu(), y_pred.cpu())
     print(f"Correct loaded-model predictions: {(y_pred == y_loaded_pred).all()}")
     plt.show()
