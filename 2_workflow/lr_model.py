@@ -84,3 +84,11 @@ if __name__ == "__main__":
     plot_predictions(X_train, y_train, X_test, y_test, y_pred)
     print(model.state_dict())
     plt.show()
+
+    loaded_model = LRModel()
+    loaded_model.load_state_dict(torch.load(MODEL_SAVE_PATH))
+    loaded_model.eval()
+    with torch.inference_mode():
+        y_pred = loaded_model(X_test)
+    plot_predictions(X_train, y_train, X_test, y_test, y_pred)
+    plt.show()
