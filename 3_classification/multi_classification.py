@@ -73,7 +73,7 @@ def plot_dec_bounds(X_train_ts, X_test_ts, y_train_ts, y_test_ts, model):
 
 
 if __name__ == "__main__":
-    NUM_CLASSES = 3
+    NUM_CLASSES = 5
     NUM_FEATURES = 2
     RAND_SEED = 42
     TRAIN_SIZE = 0.8
@@ -82,7 +82,7 @@ if __name__ == "__main__":
     device = "cuda" if torch.cuda.is_available() else "cpu"
     torch.manual_seed(RAND_SEED)
     X, y = make_blobs(n_samples = int(1e3), n_features = NUM_FEATURES, centers = NUM_CLASSES, cluster_std = 1.0)
-    X_train, X_test, y_train, y_test = train_test_split(X, y, train_size = TRAIN_SIZE)
+    X_train, X_test, y_train, y_test = train_test_split(X, y, train_size = TRAIN_SIZE, random_state = RAND_SEED)
     X_train_ts = torch.FloatTensor(X_train).to(device)
     X_test_ts = torch.FloatTensor(X_test).to(device)
     y_train_ts = torch.LongTensor(y_train).to(device)
