@@ -13,7 +13,7 @@ class FashionMNISTModelV1(torch.nn.Module):
         super().__init__()
         self.layer_stack = torch.nn.Sequential(
             torch.nn.Flatten(),
-            torch.nn.Linear(input_size, hidden_size),
+            torch.nn.Linear(input_size, hidden_size, bias = True),
             torch.nn.Linear(hidden_size, output_size)
         )
 
@@ -27,11 +27,29 @@ class FashionMNISTModelV2(torch.nn.Module):
         super().__init__()
         self.layer_stack = torch.nn.Sequential(
             torch.nn.Flatten(),
-            torch.nn.Linear(input_size, hidden_size),
+            torch.nn.Linear(input_size, hidden_size, bias = True),
             torch.nn.ReLU(),
-            torch.nn.Linear(hidden_size, output_size),
+            torch.nn.Linear(hidden_size, output_size, bias = True),
             torch.nn.ReLU()
         )
+
+    def forward(self, x):
+        logits = self.layer_stack(x)
+        return logits
+    
+
+class FashionMNISTModelV3(torch.nn.Module):
+    def __init__(self, input_size: int, hidden_size: int, output_size: int, hidden_layers: int = 1):
+        super().__init__()
+        modules = []
+        modules.append(torch.nn.Flatten())
+        for _ in range(hidden_layers):
+            modules.append(torch.nn.Linear(input_size, hidden_size, bias = True))
+            modules.append(torch.nn.ReLU())
+            input_size = hidden_size
+        modules.append(torch.nn.Linear(hidden_size, output_size, bias = True))
+        modules.append(torch.nn.ReLU())
+        self.layer_stack = torch.nn.Sequential(*modules)
 
     def forward(self, x):
         logits = self.layer_stack(x)
@@ -133,6 +151,10 @@ if __name__ == "__main__":
     models.append(FashionMNISTModelV2(input_size = w * h,
                                       hidden_size = 10,
                                       output_size = len(classes)))
+    models.append(FashionMNISTModelV3(input_size = w * h,
+                                      hidden_size = 10,
+                                      output_size = len(classes),
+                                      hidden_layers = 20))
     loss_fn = torch.nn.CrossEntropyLoss()
 
     for i, model in enumerate(models):
