@@ -162,3 +162,4 @@ cython_debug/
 env_pytorch_dl_tutorial/*
 */models/*
 */helper_functions.py
+*/datasets/
