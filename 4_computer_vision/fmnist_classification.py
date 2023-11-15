@@ -112,9 +112,20 @@ def test_step(model: torch.nn.Module,
         test_accuracies.append(batch_test_accuracy / len(test_dl))
 
 
+def print_models_eval(train_losses: list = [], test_losses: list = [],
+                      train_accs: list = [], test_accs: list = []):
+    print("\nRESULTS\n")
+    for i, (train_loss, test_loss, train_acc, test_acc) in enumerate(zip(train_losses, test_losses, train_accs, test_accs)):
+        print("Model ", i + 1, "\n---------")
+        print(f"Train loss: {train_loss :.4f}\t|\t" \
+                       f"Train accuracy: {(train_acc) * 100 :2.2f}% \n" \
+                       f"Test loss: {test_loss :.4f}\t|\t" \
+                       f"Test accuracy: {(test_acc) * 100 :2.2f}%\n")
+
+
 if __name__ == "__main__":
     BATCH_SIZE = 256
-    EPOCHS = 10
+    EPOCHS = 3
     LR = 0.1
     device = "cuda" if torch.cuda.is_available() else "cpu"
     torch.manual_seed(42)
@@ -157,6 +168,10 @@ if __name__ == "__main__":
                                       hidden_layers = 20))
     loss_fn = torch.nn.CrossEntropyLoss()
 
+    final_train_losses = []
+    final_test_losses = []
+    final_train_accuracies = []
+    final_test_accuracies = []
     for i, model in enumerate(models):
         train_losses = []
         test_losses = []
@@ -175,4 +190,10 @@ if __name__ == "__main__":
                        f"Test loss: {test_losses[-1] :.4f}\t|\t" \
                        f"Test accuracy: {(test_accuracies[-1]) * 100 :2.2f}%\n")
         train_time = int(time.time() - train_time_start)
-        print(f"Training time: {datetime.timedelta(seconds = train_time)}s\n")
+        print(f"Training time on {device}: {datetime.timedelta(seconds = train_time)}s\n")
+        final_train_losses.append(train_losses[-1])
+        final_test_losses.append(test_losses[-1])
+        final_train_accuracies.append(train_accuracies[-1])
+        final_test_accuracies.append(test_accuracies[-1])
+
+    print_models_eval(final_train_losses, final_test_losses, final_train_accuracies, final_test_accuracies)
