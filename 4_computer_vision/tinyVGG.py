@@ -4,6 +4,10 @@ from torchvision import datasets, transforms
 from pathlib import Path
 import requests
 from tqdm.auto import tqdm
+from torchmetrics import ConfusionMatrix
+from mlxtend.plotting import plot_confusion_matrix
+import matplotlib.pyplot as plt
+
 
 # Download helper functions from Learn PyTorch repo (if not already downloaded)
 Path.mkdir(Path("utils"), exist_ok = True)
@@ -119,8 +123,8 @@ def make_predictions(model: torch.nn.Module,
     with torch.inference_mode():
         for X in data:
             X = torch.unsqueeze(X, dim = 0).to(torch.float32).to(device)
-            y_pred_logit = model(X)
-            y_pred_prob = torch.softmax(y_pred_logit, dim = 1).unsqueeze(dim = 0)
+            y_pred_logit = model(X).squeeze(dim = 0)
+            y_pred_prob = torch.softmax(y_pred_logit, dim = 0)
             predictions.append(y_pred_prob.to("cpu"))
     return torch.stack(predictions)
         
@@ -201,10 +205,17 @@ if __name__ == "__main__":
             f"Test accuracy: {(test_accuracies[-1]) * 100 :2.2f}%\n"
         )
     
-    # Make predictions
+    # Make predictions (dim X_pred != N x C x H x W = 10000 x 1 x 28 x 28)
     X_pred = list(torch.unsqueeze(test_dataset.data, dim = 1).float())
     pred_prob = make_predictions(model, X_pred, device)
     pred_class = pred_prob.argmax(dim = 1)
-    print(pred_prob.shape)
-    print(f"Predicted class: {pred_prob}")
     
+    # Calculate confusion matrix
+    confmat = ConfusionMatrix(num_classes = len(test_dataset.classes), task = "multiclass")
+    confmat_tensor = confmat(preds = pred_class, target = test_dataset.targets)
+    fig, ax = plot_confusion_matrix(
+        conf_mat = confmat_tensor.numpy(),
+        class_names = test_dataset.classes,
+        figsize = (10, 7)
+    )
+    plt.show()
