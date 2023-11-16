@@ -134,10 +134,13 @@ if __name__ == "__main__":
     LR = 0.1
     BATCH_SIZE = 256
     HIDDEN_SIZE = 15
+    MODEL_NAME = "tinyvgg.pth"
+    MODEL_PATH = "4_computer_vision/models/"
     
     torch.manual_seed(42)
     device = "cuda" if torch.cuda.is_available() else "cpu"
     Path.mkdir(Path("datasets/"), exist_ok = True)
+    Path.mkdir(Path(MODEL_PATH), exist_ok = True)
 
     # Download FashionMNIST dataset
     train_dataset = datasets.FashionMNIST(
@@ -218,4 +221,22 @@ if __name__ == "__main__":
         class_names = test_dataset.classes,
         figsize = (10, 7)
     )
+
+    # Save model
+    torch.save(model.state_dict(), MODEL_PATH + MODEL_NAME)
+    print(f"Model saved to {MODEL_PATH + MODEL_NAME}")
+
+    # Load model
+    load_model = TinyVGGModel(
+        input_size = 1,
+        hidden_size = HIDDEN_SIZE,
+        output_size = len(train_dataset.classes)
+    ).to(device)
+    print("Model before loading state dict:")
+    print(load_model.state_dict())
+    load_model.load_state_dict(torch.load(MODEL_PATH + MODEL_NAME))
+    print("Model after loading state dict:")
+    print(load_model.state_dict())
+
+    # Show confusion matrix
     plt.show()
