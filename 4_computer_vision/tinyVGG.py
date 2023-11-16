@@ -59,7 +59,7 @@ class TinyVGGModel(torch.nn.Module):
         x = self.conv_block1(x)
         x = self.conv_block2(x)
         x = self.classifier(x)
-        return x.unsqueeze(0)
+        return x
 
 
 def accuracy(y_pred_logit, y_true_classes):
@@ -111,9 +111,22 @@ def test_step(model: torch.nn.Module,
         test_losses.append(batch_test_loss / len(test_dl))
         test_accuracies.append(batch_test_accuracy / len(test_dl))
 
+def make_predictions(model: torch.nn.Module,
+                     data: list,
+                     device: str = "cpu"):
+    predictions = []
+    model.eval()
+    with torch.inference_mode():
+        for X in data:
+            X = torch.unsqueeze(X, dim = 0).to(torch.float32).to(device)
+            y_pred_logit = model(X)
+            y_pred_prob = torch.softmax(y_pred_logit, dim = 1).unsqueeze(dim = 0)
+            predictions.append(y_pred_prob.to("cpu"))
+    return torch.stack(predictions)
+        
 
 if __name__ == "__main__":
-    EPOCHS = 30
+    EPOCHS = 0
     LR = 0.1
     BATCH_SIZE = 256
     HIDDEN_SIZE = 15
@@ -187,4 +200,11 @@ if __name__ == "__main__":
             f"Test loss: {test_losses[-1] :.4f}\t|\t" \
             f"Test accuracy: {(test_accuracies[-1]) * 100 :2.2f}%\n"
         )
+    
+    # Make predictions
+    X_pred = list(torch.unsqueeze(test_dataset.data, dim = 1).float())
+    pred_prob = make_predictions(model, X_pred, device)
+    pred_class = pred_prob.argmax(dim = 1)
+    print(pred_prob.shape)
+    print(f"Predicted class: {pred_prob}")
     
