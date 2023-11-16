@@ -130,7 +130,7 @@ def make_predictions(model: torch.nn.Module,
         
 
 if __name__ == "__main__":
-    EPOCHS = 0
+    EPOCHS = 10
     LR = 0.1
     BATCH_SIZE = 256
     HIDDEN_SIZE = 15
