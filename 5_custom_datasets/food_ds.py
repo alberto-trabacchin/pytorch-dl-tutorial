@@ -72,8 +72,19 @@ if __name__ == "__main__":
     print(train_data[0])
 
     # Create dataloaders
-
-
-    # plt.show()
+    train_dataloader = DataLoader(
+        dataset = train_data,
+        batch_size = 1,
+        shuffle = True,
+        num_workers = os.cpu_count()
+    )
+    test_dataloader = DataLoader(
+        dataset = test_data,
+        batch_size = 1,
+        shuffle = True,
+        num_workers = os.cpu_count()
+    )
+    print(test_dataloader)
+    plt.show()
 
     
