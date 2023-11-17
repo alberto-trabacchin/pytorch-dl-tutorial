@@ -21,7 +21,7 @@ def download_dataset(download_path, dataset_path):
             print("Downloading pizza, steak, sushi dataset as pizza_steak_sushi.zip...")
             f.write(request.content)
         
-        with zipfile.ZipFile(dataset_path / "pizza_steak_sushi.zip", "r") as zip_f:
+        with zipfile.ZipFile(download_path / "pizza_steak_sushi.zip", "r") as zip_f:
             print("Unzipping dataset to ", dataset_path)
             zip_f.extractall(dataset_path)
 
