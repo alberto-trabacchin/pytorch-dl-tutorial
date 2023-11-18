@@ -164,3 +164,4 @@ env_pytorch_dl_tutorial/*
 */helper_functions.py
 */datasets/
 datasets/
+*/data/

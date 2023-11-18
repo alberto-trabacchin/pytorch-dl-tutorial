@@ -3,6 +3,28 @@ from torchvision import datasets, transforms
 from torch.utils.data import DataLoader
 from typing import Tuple, List
 import os
+import zipfile
+import requests
+
+
+NUM_WORKERS = os.cpu_count()
+
+
+def download_dataset(download_path, dataset_path):
+    if dataset_path.is_dir():
+        print("Dataset path already exists: ", dataset_path)
+    else:
+        print("Dataset path does not exist")
+        dataset_path.mkdir(parents = True, exist_ok = True)
+
+        with open(download_path / "pizza_steak_sushi.zip", "wb") as f:
+            request = requests.get("https://github.com/mrdbourke/pytorch-deep-learning/raw/main/data/pizza_steak_sushi.zip")
+            print("Downloading pizza, steak, sushi dataset as pizza_steak_sushi.zip...")
+            f.write(request.content)
+        
+        with zipfile.ZipFile(download_path / "pizza_steak_sushi.zip", "r") as zip_f:
+            print("Unzipping dataset to ", dataset_path)
+            zip_f.extractall(dataset_path)
 
 
 def create_dataloaders(
@@ -10,7 +32,7 @@ def create_dataloaders(
         test_dir: str,
         transform: transforms,
         batch_size: int,
-        num_workers: int = os.cpu_count(),
+        num_workers: int = NUM_WORKERS,
         shuffle: bool = True
 ) -> Tuple[DataLoader, DataLoader, List[str]]:
     """Creates training and testing DataLoaders.
@@ -65,6 +87,9 @@ if __name__ == "__main__":
         test_dir = DS_PATH / "test",
         transform = transform,
         batch_size = 64,
-        num_workers = 4
+        num_workers = os.cpu_count(),
+        shuffle = True
     )
+    X_train, y_train = next(iter(train_dataloader))
     print(classes)
+    print(X_train.shape, y_train.shape)
