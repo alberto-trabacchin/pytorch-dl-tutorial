@@ -66,6 +66,7 @@ if __name__ == "__main__":
     model = TinyVGG(
         input_shape = 3,
         hidden_units = 32,
-        output_shape = 3
+        output_shape = 3,
+        name = "TinyVGG"
     ).to(device)
     utils.count_parameters(model)
