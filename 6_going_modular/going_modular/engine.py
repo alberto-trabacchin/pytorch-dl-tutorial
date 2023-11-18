@@ -185,12 +185,13 @@ if __name__ == "__main__":
     EPOCHS = 100
     BATCH_SIZE = 32
     LR = 0.0001
+    RESIZE = (32, 32)
     device = "cuda" if torch.cuda.is_available() else "cpu"
 
     # Create dataloaders
     data_setup.download_dataset(DS_DOWNL_PATH, DS_PATH)
     transform = transforms.Compose([
-        transforms.Resize((64, 64)),
+        transforms.Resize(RESIZE),
         transforms.ToTensor()
     ])
     train_dataloader, test_dataloader, classes = data_setup.create_dataloaders(
