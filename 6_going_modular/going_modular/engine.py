@@ -37,19 +37,20 @@ def train_step(
     """
     model.train()
     train_loss = 0
+    train_accuracy = 0
     for batch_sample in data_loader:
         X, y = batch_sample
         X, y = X.to(device), y.to(device)
         y_pred = model(X)
         loss = loss_fn(y_pred, y)
+        train_loss += loss.item()
+        train_accuracy += utils.accuracy(y_pred, y)
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
-        train_loss += loss.item()
     train_loss /= len(data_loader)
-    train_accuracy = utils.accuracy(y_pred, y)
+    train_accuracy /= len(data_loader)
     return train_loss, train_accuracy
-
 
 
 def test_step(
@@ -77,6 +78,7 @@ def test_step(
     """
     model.eval()
     test_loss = 0
+    test_accuracy = 0
     with torch.inference_mode():
         for batch_sample in data_loader:
             X, y = batch_sample
@@ -84,8 +86,9 @@ def test_step(
             y_pred = model(X)
             loss = loss_fn(y_pred, y)
             test_loss += loss.item()
+            test_accuracy += utils.accuracy(y_pred, y)
         test_loss /= len(data_loader)
-        test_accuracy = utils.accuracy(y_pred, y)
+        test_accuracy /= len(data_loader)
     return test_loss, test_accuracy
 
 
@@ -185,7 +188,7 @@ if __name__ == "__main__":
     EPOCHS = 100
     BATCH_SIZE = 32
     LR = 0.0001
-    RESIZE = (32, 32)
+    RESIZE = (512, 512)
     device = "cuda" if torch.cuda.is_available() else "cpu"
 
     # Create dataloaders

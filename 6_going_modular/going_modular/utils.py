@@ -1,7 +1,9 @@
 from prettytable import PrettyTable
 import torch
-from going_modular import model_builder
 from typing import Dict, List
+from pathlib import Path
+
+from going_modular import model_builder
 
 
 def accuracy(y_pred_logit, y_true_classes):
@@ -51,6 +53,19 @@ def count_parameters(model: torch.nn.Module, verbose = True) -> int:
         print(table)
         print(f"Total trainable params: {total_params}")
     return total_params
+
+
+def save_model(model: torch.nn.Module, model_dir: Path) -> None:
+    model_path = model_dir / f"{model.name}.pth"
+    torch.save(model.state_dict(), model_path)
+    print(f"Saved model to {model_path}")
+
+
+def load_model(model: torch.nn.Module, model_dir: Path) -> torch.nn.Module:
+    model_path = model_dir / f"{model.name}.pth"
+    model.load_state_dict(torch.load(model_path))
+    print(f"Loaded model from {model_path}")
+    return model
 
 
 if __name__ == "__main__":
