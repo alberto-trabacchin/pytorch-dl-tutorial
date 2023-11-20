@@ -3,6 +3,7 @@ import torch
 from torchvision.transforms import transforms
 from pathlib import Path
 from torchvision.models import resnet50, ResNet50_Weights, resnet152, ResNet152_Weights
+import torchinfo
 
 from semi_sup_learning import data_setup, engine, utils
 
@@ -70,6 +71,16 @@ if __name__ == "__main__":
     student_model = resnet50(
         weights = ResNet50_Weights.DEFAULT,
         progress = True
+    )
+    for param in teacher_model.parameters():
+        param.requires_grad = False
+    for param in student_model.parameters():
+        param.requires_grad = False
+    teacher_model.fc = torch.nn.Sequential(
+        torch.nn.Linear(2048, 10)
+    )
+    student_model.fc = torch.nn.Sequential(
+        torch.nn.Linear(2048, 10)
     )
 
     # Create optimizer and loss function
