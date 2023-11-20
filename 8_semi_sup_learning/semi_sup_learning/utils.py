@@ -70,7 +70,7 @@ def load_model(name: str, model: torch.nn.Module, model_dir: Path) -> torch.nn.M
     return model
 
 
-def plot_losses(model_results: Dict[str, dict], save_name: Path = None) -> None:
+def plot_losses(model_results: Dict[str, dict], save_path: Path = None) -> None:
     epochs = np.array(model_results["epoch"], dtype = np.int32)
     train_loss = np.array(model_results["train_loss"], dtype = np.float32)
     test_loss = np.array(model_results["test_loss"], dtype = np.float32)
@@ -82,10 +82,11 @@ def plot_losses(model_results: Dict[str, dict], save_name: Path = None) -> None:
     ax.set_ylabel("Loss")
     ax.set_title("Losses")
     ax.legend()
-    if save_name is not None:
+    if save_path is not None:
+        save_path.parent[0].mkdir(parents = True, exist_ok = True)
         fig.set_size_inches(10, 8)
         fig.set_dpi(1000)
-        fig.savefig(save_name)
+        fig.savefig(save_path)
 
 
 def plot_accuracies(model_results: Dict[str, dict], save_name: Path = None) -> None:

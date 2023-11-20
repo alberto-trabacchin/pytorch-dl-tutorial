@@ -4,7 +4,7 @@ from torchvision.transforms import transforms
 from pathlib import Path
 from torchvision.models import resnet50, ResNet50_Weights, resnet152, ResNet152_Weights
 
-from semi_sup_learning import data_setup, engine
+from semi_sup_learning import data_setup, engine, utils
 
 
 if __name__ == "__main__":
@@ -25,6 +25,7 @@ if __name__ == "__main__":
     parser.add_argument("--verbose", type = bool, default = True, help = "Whether or not to print results")
     parser.add_argument("--device", type = torch.device, default = "cuda" if torch.cuda.is_available() else "cpu", help = "Device to train model on")
     parser.add_argument("--labels_ratio", type = float, default = 0.3, help = "Ratio of labeled data on the training dataset for training the teacher")
+    parser.add_argument("--results_path", type = str, default = "results/", help = "Path to save results")
 
     args = parser.parse_args()
 
@@ -41,6 +42,7 @@ if __name__ == "__main__":
     VERBOSE = args.verbose
     DEVICE = args.device
     LABELS_RATIO = args.labels_ratio
+    RESULTS_PATH = Path(args.results_path)
 
     # Create dataloaders
     torch.manual_seed(42)
@@ -82,7 +84,7 @@ if __name__ == "__main__":
     loss_fn = torch.nn.CrossEntropyLoss()
 
     # Create model, loss function and optimizer for training
-    engine.train(
+    mod_teach_results = engine.train(
         model = teacher_model,
         model_name = "resnet50_teacher",
         train_dataloader = train_lab_dataloader,
@@ -102,7 +104,7 @@ if __name__ == "__main__":
     )
     
     # Train student model
-    engine.train(
+    model_stud_results = engine.train(
         model = student_model,
         model_name = "resnet50_student",
         train_dataloader = train_unlab_dataloader,
@@ -113,4 +115,22 @@ if __name__ == "__main__":
         device = DEVICE,
         verbose = VERBOSE,
         pseudo_labels = pseudo_labels
+    )
+    utils.save_model(
+        name = f"resnet50_teacher_{EPOCHS}_epochs_{LABELS_RATIO}_labels_ratio.pth",
+        model = teacher_model,
+        model_dir = MODEL_DIR
+    )
+    utils.save_model(
+        name = f"resnet50_student_{EPOCHS}_epochs_{LABELS_RATIO}_labels_ratio.pth",
+        model = student_model,
+        model_dir = MODEL_DIR
+    )
+    utils.plot_accuracies(
+        model_results = mod_teach_results,
+        save_path = RESULTS_PATH / f"resnet50_teacher_{EPOCHS}_epochs_{LABELS_RATIO}_labels_ratio.png"
+    )
+    utils.plot_accuracies(
+        model_results = model_stud_results,
+        save_path = RESULTS_PATH / f"resnet50_student_{EPOCHS}_epochs_{LABELS_RATIO}_labels_ratio.png"
     )
