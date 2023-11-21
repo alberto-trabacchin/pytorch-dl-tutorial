@@ -6,6 +6,5 @@ torchmetrics
 tqdm
 prettytable
 requests
-zipfile
-torchmetrics
+torchinfo
 wandb
