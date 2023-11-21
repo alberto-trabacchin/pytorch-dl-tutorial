@@ -104,8 +104,9 @@ def train(
         optimizer: torch.optim.Optimizer,
         epochs: int,
         device: torch.device,
+        track_online: bool,
         verbose: bool = True,
-        pseudo_labels = None
+        pseudo_labels = None,
 ) -> Dict[str, List[float]]:
     """Trains and tests a PyTorch model.
 
@@ -182,10 +183,11 @@ def train(
                 test_acc = test_accuracy
             )
             tqdm.write(results_table.get_string())
-        wandb.log({f"Train Accuracy {model_name}": train_accuracy,
-                   f"Train Loss {model_name}": train_loss,
-                   f"Test Accuracy {model_name}": test_accuracy,
-                   f"Test Loss {model_name}": test_loss})
+        if track_online:
+            wandb.log({f"Train Accuracy {model_name}": train_accuracy,
+                    f"Train Loss {model_name}": train_loss,
+                    f"Test Accuracy {model_name}": test_accuracy,
+                    f"Test Loss {model_name}": test_loss})
     return results
 
 
