@@ -1,6 +1,6 @@
 from pathlib import Path
 from torchvision import datasets, transforms
-from torch.utils.data import DataLoader, random_split
+from torch.utils.data import DataLoader, random_split, Subset
 import torch
 from typing import Tuple, List
 import os
@@ -9,6 +9,22 @@ import requests
 
 
 NUM_WORKERS = os.cpu_count()
+
+class PseudoDataset(Subset):
+    def __init__(self, dataset: Subset):
+        super().__init__(dataset, dataset.indices)
+        self.pseudo_labels = {"idx", "label"}
+
+    def __getitem__(self, idx):
+        if isinstance(idx, list):
+            return (self.dataset[[self.indices[i] for i in idx]], self.pseudo_labels)
+        return (self.dataset[self.indices[idx]], self.pseudo_labels[idx])
+    
+    def __len__(self):
+        return super().__len__()
+    
+    def set_pseudo_labels(self, pseudo_labels):
+        self.pseudo_labels = pseudo_labels
 
 
 def create_dataloaders(
@@ -67,4 +83,9 @@ def create_dataloaders(
                                  batch_size = batch_size,
                                  shuffle = shuffle,
                                  num_workers = num_workers)
+    
+    y_len = len(train_unlab_dataset)
+    pseudo_labels = torch.randint(0, 10, (y_len,)).tolist()
+    print(train_unlab_dataset.indices)
+    exit()
     return train_lab_dataloader, train_unlab_dataloader, test_dataloader, class_names
